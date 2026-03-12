@@ -1,63 +1,51 @@
-# CLEAN
+# Todo API — C# Clean Architecture
 
-### Exercise: To-Do List API
+A RESTful To-Do list API built with C# and ASP.NET Core,
+following Clean Architecture.
 
-An application with the following layers:  
-- Entities (Domain Layer) → Pure business logic, independent of frameworks.   
-- Use Cases (Application Layer) → Orchestrates business logic and defines application behavior.   
-- Adapters (Interface Layer) → Controllers, presenters, and UI elements.   
-- Infrastructure (Data Layer) → External services (database, APIs, frameworks).  
+## Architecture
 
 ```
-./
-│   ├── LICENSE
-│   ├── README.md
-│   ├── TodoApp.sln
-│   ├── .gitignore
-│   ├── TodoApp
-│   │   ├── TodoApp.Domain                           # Entities and Interfaces
-│   │   │   ├── TodoApp.Domain.csproj
-│   │   │   ├── Entities
-│   │   │   │   ├── TodoItem.cs
-│   │   │   ├── Interfaces
-│   │   │   │   ├── TodoRepository.cs
-│   │   ├── TodoApp.Infrastructure                   # Data Access, External Services
-│   │   │   ├── Repositories
-│   │   │   │   ├── TodoRepository.cs
-│   │   │   ├── TodoApp.Infrastructure.csproj
-│   │   ├── TodoApp.Application                      # Business Logic (Use Cases)
-│   │   │   ├── TodoApp.Application.csproj
-│   │   │   ├── Services
-│   │   │   │   ├── TodoService.cs
-│   │   ├── TodoApp.Api                              # Presentation Layer (Controllers)
-│   │   │   ├── appsettings.json
-│   │   │   ├── TodoApp.Api.csproj
-│   │   │   ├── Properties
-│   │   │   │   ├── launchSettings.json
-│   │   │   ├── appsettings.Development.json
-│   │   │   ├── Controllers
-│   │   │   │   ├── TodoController.cs
-│   │   │   ├── Program.cs
-│   │   ├── TodoApp.Tests                           # Unit & Integration Tests
-│   │   │   ├── TodoApp.Tests.csproj
-│   │   │   ├── TodoRepositoryTests.cs
-│   │   │   ├── TodoServiceTests.cs
+TodoApp/
+├── TodoApp.Domain/          Entities + Repository interface
+├── TodoApp.Application/     Business logic (TodoService)
+├── TodoApp.Infrastructure/  In-memory repository
+└── TodoApp.Api/             HTTP controllers
 ```
 
-### Test
+## API Endpoints
 
-```bash
-cd TodoApp/TodoApp.Tests
-dotnet test
+| Method | Endpoint     | Description    |
+|--------|--------------|----------------|
+| GET    | /todos       | List all todos |
+| POST   | /todos       | Create a todo  |
+| GET    | /todos/{id}  | Get by ID      |
+| PUT    | /todos/{id}  | Update a todo  |
+| DELETE | /todos/{id}  | Delete a todo  |
+
+## Todo Object
+
+```json
+{
+  "id": 1,
+  "title": "Buy groceries",
+  "isCompleted": false,
+  "createdAt": "2026-03-12T11:00:00Z"
+}
 ```
 
-### Run    
+## Requirements
+
+- .NET 8+
+
+## Setup & Run
 
 ```bash
 cd TodoApp/TodoApp.Api
 dotnet run
 ```
 
-### View
+Server runs on `http://localhost:8080`.
 
-`http://localhost:5205/swagger`
+Configure port in `TodoApp/TodoApp.Api/Properties/launchSettings.json`
+or set `ASPNETCORE_URLS=http://localhost:8080`.

@@ -6,7 +6,7 @@
 /*    By: lucas <lucas@tsiaraso.com>                   +########+             */
 /*                                                         +###+              */
 /*    Created: 2025/03/13 02:22:44 by lucas                  ##+              */
-/*    Updated: 2025/03/13 02:22:44 by lucas                  #+               */
+/*    Updated: 2026/03/12 12:37:41 by lucas                  #+               */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@ using TodoApp.Domain.Entities;
 namespace TodoApp.Api.Controllers;
 
 [ApiController]
-[Route("api/todo")]
+[Route("todos")]
 public class TodoController : ControllerBase
 {
     private readonly TodoService _service;
@@ -28,7 +28,8 @@ public class TodoController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<TodoItem>>> Get() => Ok(await _service.GetAllAsync());
+    public async Task<ActionResult<List<TodoItem>>> Get()
+        => Ok(await _service.GetAllAsync());
 
     [HttpGet("{id}")]
     public async Task<ActionResult<TodoItem?>> Get(int id)
@@ -40,21 +41,23 @@ public class TodoController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Post([FromBody] string title)
     {
-        await _service.AddAsync(title);
-        return CreatedAtAction(nameof(Get), new { title }, null);
+        var item = await _service.AddAsync(title);
+        return CreatedAtAction(nameof(Get), new { id = item.Id }, item);
     }
 
     [HttpPut("{id}")]
     public async Task<IActionResult> Put(int id, [FromBody] TodoItem item)
     {
-        await _service.UpdateAsync(id, item.Title, item.IsCompleted);
-        return NoContent();
+        var updated = await _service.UpdateAsync(id, item.Title, item.IsCompleted);
+        if (updated == null) return NotFound();
+        return Ok(updated);
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
-        await _service.DeleteAsync(id);
+        var ok = await _service.DeleteAsync(id);
+        if (!ok) return NotFound();
         return NoContent();
     }
 }

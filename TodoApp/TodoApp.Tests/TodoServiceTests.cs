@@ -6,7 +6,7 @@
 /*    By: lucas <lucas@tsiaraso.com>                   +########+             */
 /*                                                         +###+              */
 /*    Created: 2025/03/13 02:22:44 by lucas                  ##+              */
-/*    Updated: 2025/03/13 02:22:44 by lucas                  #+               */
+/*    Updated: 2026/03/12 12:37:41 by lucas                  #+               */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,10 +74,14 @@ public class TodoServiceTests
         var title = "New Task";
 
         // Act
-        await _service.AddAsync(title);
+        var result = await _service.AddAsync(title);
 
         // Assert
-        _mockRepo.Verify(repo => repo.AddAsync(It.Is<TodoItem>(t => t.Title == title)), Times.Once);
+        result.Should().NotBeNull();
+        result.Title.Should().Be(title);
+        _mockRepo.Verify(
+            repo => repo.AddAsync(It.Is<TodoItem>(t => t.Title == title)),
+            Times.Once);
     }
 
     [Fact]
@@ -99,10 +103,15 @@ public class TodoServiceTests
     [Fact]
     public async Task DeleteAsync_ShouldRemoveItem()
     {
+        // Arrange
+        var todo = new TodoItem { Id = 1, Title = "Task 1" };
+        _mockRepo.Setup(repo => repo.GetByIdAsync(1)).ReturnsAsync(todo);
+
         // Act
-        await _service.DeleteAsync(1);
+        var result = await _service.DeleteAsync(1);
 
         // Assert
+        result.Should().BeTrue();
         _mockRepo.Verify(repo => repo.DeleteAsync(1), Times.Once);
     }
 }

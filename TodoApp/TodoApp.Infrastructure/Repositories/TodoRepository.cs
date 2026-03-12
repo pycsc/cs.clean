@@ -6,11 +6,12 @@
 /*    By: lucas <lucas@tsiaraso.com>                   +########+             */
 /*                                                         +###+              */
 /*    Created: 2025/03/13 02:22:44 by lucas                  ##+              */
-/*    Updated: 2025/03/13 02:22:44 by lucas                  #+               */
+/*    Updated: 2026/03/12 12:37:41 by lucas                  #+               */
 /*                                                                            */
 /* ************************************************************************** */
 
-﻿using TodoApp.Domain.Entities;
+﻿using System;
+using TodoApp.Domain.Entities;
 using TodoApp.Domain.Interfaces;
 
 namespace TodoApp.Infrastructure.Repositories;
@@ -26,6 +27,7 @@ public class TodoRepository : ITodoRepository
     public Task AddAsync(TodoItem item)
     {
         item.Id = _items.Count + 1;
+        item.CreatedAt = DateTime.UtcNow;
         _items.Add(item);
         return Task.CompletedTask;
     }
