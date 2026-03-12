@@ -6,7 +6,7 @@
 /*    By: lucas <lucas@tsiaraso.com>                   +########+             */
 /*                                                         +###+              */
 /*    Created: 2025/03/13 02:22:44 by lucas                  ##+              */
-/*    Updated: 2025/03/13 02:22:44 by lucas                  #+               */
+/*    Updated: 2026/03/12 12:49:17 by lucas                  #+               */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,3 +36,5 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+public partial class Program { }

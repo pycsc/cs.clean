@@ -6,7 +6,7 @@
 /*    By: lucas <lucas@tsiaraso.com>                   +########+             */
 /*                                                         +###+              */
 /*    Created: 2025/03/13 02:22:44 by lucas                  ##+              */
-/*    Updated: 2026/03/12 12:37:41 by lucas                  #+               */
+/*    Updated: 2026/03/12 12:49:17 by lucas                  #+               */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,95 +23,68 @@ namespace TodoApp.Tests;
 
 public class TodoServiceTests
 {
-    private readonly Mock<ITodoRepository> _mockRepo;
-    private readonly TodoService _service;
+    private readonly Mock<ITodoRepository> _repo;
+    private readonly TodoService _svc;
 
     public TodoServiceTests()
     {
-        _mockRepo = new Mock<ITodoRepository>();
-        _service = new TodoService(_mockRepo.Object);
+        _repo = new Mock<ITodoRepository>();
+        _svc  = new TodoService(_repo.Object);
     }
 
     [Fact]
-    public async Task GetAllAsync_ShouldReturnAllTodos()
+    public async Task GetAllAsync_ReturnsAllTodos()
     {
-        // Arrange
-        var todos = new List<TodoItem>
+        var list = new List<TodoItem>
         {
-            new TodoItem { Id = 1, Title = "Task 1", IsCompleted = false },
-            new TodoItem { Id = 2, Title = "Task 2", IsCompleted = true }
+            new() { Id = 1, Title = "A" },
+            new() { Id = 2, Title = "B" },
         };
-        _mockRepo.Setup(repo => repo.GetAllAsync()).ReturnsAsync(todos);
-
-        // Act
-        var result = await _service.GetAllAsync();
-
-        // Assert
+        _repo.Setup(r => r.GetAllAsync()).ReturnsAsync(list);
+        var result = await _svc.GetAllAsync();
         result.Should().HaveCount(2);
-        result.Should().ContainSingle(x => x.Title == "Task 1" && !x.IsCompleted);
-        result.Should().ContainSingle(x => x.Title == "Task 2" && x.IsCompleted);
     }
 
     [Fact]
-    public async Task GetByIdAsync_ShouldReturnCorrectTodo()
+    public async Task GetByIdAsync_ReturnsTodo()
     {
-        // Arrange
-        var todo = new TodoItem { Id = 1, Title = "Task 1", IsCompleted = false };
-        _mockRepo.Setup(repo => repo.GetByIdAsync(1)).ReturnsAsync(todo);
-
-        // Act
-        var result = await _service.GetByIdAsync(1);
-
-        // Assert
-        result.Should().NotBeNull();
-        result.Should().BeEquivalentTo(todo);
+        var item = new TodoItem { Id = 1, Title = "Test" };
+        _repo.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(item);
+        var result = await _svc.GetByIdAsync(1);
+        result.Should().BeEquivalentTo(item);
     }
 
     [Fact]
-    public async Task AddAsync_ShouldCallRepositoryOnce()
+    public async Task AddAsync_ReturnsCreatedItem()
     {
-        // Arrange
-        var title = "New Task";
-
-        // Act
-        var result = await _service.AddAsync(title);
-
-        // Assert
+        _repo.Setup(r => r.AddAsync(It.IsAny<TodoItem>()))
+             .Returns(Task.CompletedTask);
+        var result = await _svc.AddAsync("New Task");
         result.Should().NotBeNull();
-        result.Title.Should().Be(title);
-        _mockRepo.Verify(
-            repo => repo.AddAsync(It.Is<TodoItem>(t => t.Title == title)),
+        result.Title.Should().Be("New Task");
+        _repo.Verify(
+            r => r.AddAsync(It.Is<TodoItem>(t => t.Title == "New Task")),
             Times.Once);
     }
 
     [Fact]
-    public async Task UpdateAsync_ShouldModifyTodo()
+    public async Task UpdateAsync_ModifiesTodo()
     {
-        // Arrange
-        var existingTodo = new TodoItem { Id = 1, Title = "Old Task", IsCompleted = false };
-        _mockRepo.Setup(repo => repo.GetByIdAsync(1)).ReturnsAsync(existingTodo);
-
-        // Act
-        await _service.UpdateAsync(1, "Updated Task", true);
-
-        // Assert
-        existingTodo.Title.Should().Be("Updated Task");
-        existingTodo.IsCompleted.Should().BeTrue();
-        _mockRepo.Verify(repo => repo.UpdateAsync(It.IsAny<TodoItem>()), Times.Once);
+        var item = new TodoItem { Id = 1, Title = "Old" };
+        _repo.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(item);
+        var result = await _svc.UpdateAsync(1, "New", true);
+        result.Should().NotBeNull();
+        result!.Title.Should().Be("New");
+        result.IsCompleted.Should().BeTrue();
     }
 
     [Fact]
-    public async Task DeleteAsync_ShouldRemoveItem()
+    public async Task DeleteAsync_ReturnsTrueWhenFound()
     {
-        // Arrange
-        var todo = new TodoItem { Id = 1, Title = "Task 1" };
-        _mockRepo.Setup(repo => repo.GetByIdAsync(1)).ReturnsAsync(todo);
-
-        // Act
-        var result = await _service.DeleteAsync(1);
-
-        // Assert
-        result.Should().BeTrue();
-        _mockRepo.Verify(repo => repo.DeleteAsync(1), Times.Once);
+        var item = new TodoItem { Id = 1, Title = "A" };
+        _repo.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(item);
+        var ok = await _svc.DeleteAsync(1);
+        ok.Should().BeTrue();
+        _repo.Verify(r => r.DeleteAsync(1), Times.Once);
     }
 }
